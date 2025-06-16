@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: cier_db
+      POSTGRES_USER: cier_user
+      POSTGRES_PASSWORD: cier_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgresql://cier_user:cier_password@db:5432/cier_db
+      - STRIPE_PUBLISHABLE_KEY=pk_test_51234567890abcdef
+      - STRIPE_SECRET_KEY=sk_test_51234567890abcdef
+      - STRIPE_WEBHOOK_SECRET=whsec_test123456789
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+    command: python manage.py runserver 0.0.0.0:8000
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51234567890abcdef
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+
+volumes:
+  postgres_data:

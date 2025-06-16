@@ -1,0 +1,377 @@
+Watching for file changes with StatReloader
+[12/Jun/2025 17:02:56] "POST /api/accounts/login/ HTTP/1.1" 200 771
+Not Found: /api/accounts/me/
+[12/Jun/2025 17:02:56] "GET /api/accounts/me/ HTTP/1.1" 404 3614
+/Users/ty/CiER/backend/referrals/urls.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+June 12, 2025 - 17:02:41
+Django version 5.0.2, using settings 'cier_project.settings'
+Starting development server at http://127.0.0.1:8001/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+[12/Jun/2025 17:03:26] "POST /api/accounts/login/ HTTP/1.1" 200 771
+[12/Jun/2025 17:03:42] "POST /api/accounts/login/ HTTP/1.1" 200 771
+[12/Jun/2025 17:03:50] "POST /api/accounts/login/ HTTP/1.1" 200 771
+[12/Jun/2025 17:03:59] "GET /api/referrals/link/ HTTP/1.1" 200 216
+[12/Jun/2025 17:04:07] "GET /api/referrals/validate/2cde0e36-8456-4f04-80b3-0c8491f4323d/ HTTP/1.1" 200 338
+/Users/ty/CiER/backend/referrals/models.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+June 12, 2025 - 17:03:26
+Django version 5.0.2, using settings 'cier_project.settings'
+Starting development server at http://127.0.0.1:8001/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+/Users/ty/CiER/backend/bookings/views.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+June 12, 2025 - 17:14:17
+Django version 5.0.2, using settings 'cier_project.settings'
+Starting development server at http://127.0.0.1:8001/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+/Users/ty/CiER/backend/bookings/views.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+June 12, 2025 - 17:15:28
+Django version 5.0.2, using settings 'cier_project.settings'
+Starting development server at http://127.0.0.1:8001/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+[12/Jun/2025 17:18:09] "OPTIONS /api/referrals/list/ HTTP/1.1" 200 0
+[12/Jun/2025 17:18:09] "OPTIONS /api/referrals/link/ HTTP/1.1" 200 0
+Unauthorized: /api/referrals/list/
+Unauthorized: /api/referrals/link/
+[12/Jun/2025 17:18:09] "GET /api/referrals/list/ HTTP/1.1" 401 172
+[12/Jun/2025 17:18:09] "GET /api/referrals/link/ HTTP/1.1" 401 172
+[12/Jun/2025 17:18:09] "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+[12/Jun/2025 17:18:09] "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+Internal Server Error: /api/accounts/token/refresh/
+Traceback (most recent call last):
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 44, in post
+    serializer.is_valid(raise_exception=True)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 141, in validate
+    refresh.outstand()
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/tokens.py", line 222, in outstand
+    return OutstandingToken.objects.get_or_create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'OutstandingToken' has no attribute 'objects'
+[12/Jun/2025 17:18:09] "POST /api/accounts/token/refresh/ HTTP/1.1" 500 113513
+Internal Server Error: /api/accounts/token/refresh/
+Traceback (most recent call last):
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 44, in post
+    serializer.is_valid(raise_exception=True)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 141, in validate
+    refresh.outstand()
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/tokens.py", line 222, in outstand
+    return OutstandingToken.objects.get_or_create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'OutstandingToken' has no attribute 'objects'
+[12/Jun/2025 17:18:09] "POST /api/accounts/token/refresh/ HTTP/1.1" 500 113513
+Not Found: /api/
+[12/Jun/2025 17:22:04] "GET /api/ HTTP/1.1" 404 2561
+Bad Request: /api/accounts/login/
+[12/Jun/2025 17:23:32] "POST /api/accounts/login/ HTTP/1.1" 400 94
+[12/Jun/2025 17:23:53] "POST /api/accounts/login/ HTTP/1.1" 200 763
+[12/Jun/2025 17:24:13] "GET /api/referrals/link/ HTTP/1.1" 200 213
+[12/Jun/2025 17:24:38] "GET /api/referrals/qr-code/ HTTP/1.1" 200 1241
+[12/Jun/2025 17:27:48] "OPTIONS /api/accounts/login/ HTTP/1.1" 200 0
+[12/Jun/2025 17:27:48] "POST /api/accounts/login/ HTTP/1.1" 200 771
+[12/Jun/2025 17:27:53] "OPTIONS /api/referrals/stats/ HTTP/1.1" 200 0
+/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/pagination.py:207: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'referrals.models.Referral'> QuerySet.
+  paginator = self.django_paginator_class(queryset, page_size)
+[12/Jun/2025 17:27:53] "GET /api/referrals/link/ HTTP/1.1" 200 213
+[12/Jun/2025 17:27:53] "GET /api/referrals/stats/ HTTP/1.1" 200 63
+[12/Jun/2025 17:27:53] "GET /api/referrals/list/ HTTP/1.1" 200 52
+[12/Jun/2025 17:27:53] "OPTIONS /api/referrals/qr-code/ HTTP/1.1" 200 0
+[12/Jun/2025 17:27:53] "GET /api/referrals/qr-code/ HTTP/1.1" 200 1217
+/Users/ty/CiER/backend/referrals/models.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+June 12, 2025 - 17:18:06
+Django version 5.0.2, using settings 'cier_project.settings'
+Starting development server at http://127.0.0.1:8001/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+[12/Jun/2025 17:33:59] "POST /api/accounts/login/ HTTP/1.1" 200 763
+[12/Jun/2025 17:34:11] "POST /api/accounts/login/ HTTP/1.1" 200 763
+[12/Jun/2025 17:34:11] "GET /api/referrals/link/ HTTP/1.1" 200 155
+/Users/ty/CiER/backend/referrals/models.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+June 12, 2025 - 17:30:17
+Django version 5.0.2, using settings 'cier_project.settings'
+Starting development server at http://127.0.0.1:8001/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+[12/Jun/2025 17:35:52] "OPTIONS /api/accounts/profile/ HTTP/1.1" 200 0
+[12/Jun/2025 17:35:52] "GET /api/accounts/profile/ HTTP/1.1" 200 266
+[12/Jun/2025 17:35:53] "GET /api/referrals/stats/ HTTP/1.1" 200 63
+[12/Jun/2025 17:35:53] "GET /api/referrals/link/ HTTP/1.1" 200 155
+/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/pagination.py:207: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'referrals.models.Referral'> QuerySet.
+  paginator = self.django_paginator_class(queryset, page_size)
+[12/Jun/2025 17:35:53] "GET /api/referrals/list/ HTTP/1.1" 200 52
+[12/Jun/2025 17:35:53] "GET /api/referrals/qr-code/ HTTP/1.1" 200 1003
+[13/Jun/2025 13:42:19] "OPTIONS /api/referrals/list/ HTTP/1.1" 200 0
+[13/Jun/2025 13:42:19] "OPTIONS /api/referrals/link/ HTTP/1.1" 200 0
+[13/Jun/2025 13:42:19] "OPTIONS /api/referrals/stats/ HTTP/1.1" 200 0
+[13/Jun/2025 13:42:19] "OPTIONS /api/referrals/qr-code/ HTTP/1.1" 200 0
+Unauthorized: /api/referrals/qr-code/
+Unauthorized: /api/referrals/list/
+Unauthorized: /api/referrals/link/
+Unauthorized: /api/referrals/stats/
+[13/Jun/2025 13:42:19] "GET /api/referrals/list/ HTTP/1.1" 401 172
+[13/Jun/2025 13:42:19] "GET /api/referrals/qr-code/ HTTP/1.1" 401 172
+[13/Jun/2025 13:42:19] "GET /api/referrals/link/ HTTP/1.1" 401 172
+[13/Jun/2025 13:42:19] "GET /api/referrals/stats/ HTTP/1.1" 401 172
+[13/Jun/2025 13:42:19] "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+[13/Jun/2025 13:42:19] "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+[13/Jun/2025 13:42:19] "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+[13/Jun/2025 13:42:19] "OPTIONS /api/accounts/token/refresh/ HTTP/1.1" 200 0
+Internal Server Error: /api/accounts/token/refresh/
+Traceback (most recent call last):
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 44, in post
+    serializer.is_valid(raise_exception=True)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 141, in validate
+    refresh.outstand()
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/tokens.py", line 222, in outstand
+    return OutstandingToken.objects.get_or_create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'OutstandingToken' has no attribute 'objects'
+Internal Server Error: /api/accounts/token/refresh/
+Traceback (most recent call last):
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 44, in post
+    serializer.is_valid(raise_exception=True)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 141, in validate
+    refresh.outstand()
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/tokens.py", line 222, in outstand
+    return OutstandingToken.objects.get_or_create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'OutstandingToken' has no attribute 'objects'
+[13/Jun/2025 13:42:26] "POST /api/accounts/token/refresh/ HTTP/1.1" 500 113513
+[13/Jun/2025 13:42:26] "POST /api/accounts/token/refresh/ HTTP/1.1" 500 113513
+Internal Server Error: /api/accounts/token/refresh/
+Traceback (most recent call last):
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 44, in post
+    serializer.is_valid(raise_exception=True)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 141, in validate
+    refresh.outstand()
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/tokens.py", line 222, in outstand
+    return OutstandingToken.objects.get_or_create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'OutstandingToken' has no attribute 'objects'
+Internal Server Error: /api/accounts/token/refresh/
+Traceback (most recent call last):
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 515, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 475, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 486, in raise_uncaught_exception
+    raise exc
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/views.py", line 512, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/views.py", line 44, in post
+    serializer.is_valid(raise_exception=True)
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 225, in is_valid
+    self._validated_data = self.run_validation(self.initial_data)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework/serializers.py", line 447, in run_validation
+    value = self.validate(value)
+            ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/serializers.py", line 141, in validate
+    refresh.outstand()
+  File "/Users/ty/anaconda3/lib/python3.11/site-packages/rest_framework_simplejwt/tokens.py", line 222, in outstand
+    return OutstandingToken.objects.get_or_create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'OutstandingToken' has no attribute 'objects'
+[13/Jun/2025 13:42:26] "POST /api/accounts/token/refresh/ HTTP/1.1" 500 113513
+[13/Jun/2025 13:42:26] "POST /api/accounts/token/refresh/ HTTP/1.1" 500 113513
+[15/Jun/2025 12:11:14] "OPTIONS /api/accounts/login/ HTTP/1.1" 200 0
+Bad Request: /api/accounts/login/
+[15/Jun/2025 12:11:14] "POST /api/accounts/login/ HTTP/1.1" 400 94
+Bad Request: /api/accounts/login/
+[15/Jun/2025 12:11:20] "POST /api/accounts/login/ HTTP/1.1" 400 94
+[15/Jun/2025 12:12:18] "POST /api/accounts/login/ HTTP/1.1" 200 763
+[15/Jun/2025 12:25:20] "POST /api/accounts/login/ HTTP/1.1" 200 763
+/Users/ty/CiER/backend/accounts/views.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+June 12, 2025 - 17:35:43
+Django version 5.0.2, using settings 'cier_project.settings'
+Starting development server at http://127.0.0.1:8001/
+Quit the server with CONTROL-C.
+
+Fatal Python error: init_sys_streams: can't initialize sys standard streams
+Python runtime state: core initialized
+OSError: [Errno 9] Bad file descriptor
+
+Current thread 0x00000001ef5bdf00 (most recent call first):
+  <no Python frame>
