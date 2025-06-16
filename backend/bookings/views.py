@@ -40,14 +40,60 @@ class StylistListView(generics.ListAPIView):
 @api_view(['POST'])
 @permission_classes([IsAuthenticatedOrGuestWithReferral])
 def create_appointment(request):
-    """予約作成（支払いオプション対応・ゲスト予約対応）"""
+    """予約作成（支払いオプション対応・ゲスト予約対応・自動割り当て対応）"""
     serializer = AppointmentCreateSerializer(data=request.data)
     if serializer.is_valid():
         payment_method = serializer.validated_data.pop('payment_method', 'in_person')
         referral_code = serializer.validated_data.pop('referral_code', None)
         start_time = serializer.validated_data.pop('start_time', None)
         guest_info = request.data.get('guest_info', None)
+        auto_assign = request.data.get('auto_assign', False)  # 自動割り当てフラグ
         pay_now = (payment_method == 'online')
+        
+        # 自動割り当ての場合、スタイリストを自動選択
+        if auto_assign and not serializer.validated_data.get('stylist'):
+            from accounts.models import StylistProfile
+            
+            appointment_date = serializer.validated_data['appointment_date']
+            appointment_datetime = datetime.combine(appointment_date, start_time) if start_time else None
+            
+            if appointment_datetime:
+                # 利用可能なスタイリストを優先度順で取得
+                available_profiles = StylistProfile.objects.filter(
+                    is_active=True,
+                    accepts_walk_ins=True
+                ).order_by('priority_level')
+                
+                assigned_stylist = None
+                for profile in available_profiles:
+                    if profile.is_available_at(appointment_datetime):
+                        # 既存の予約をチェック
+                        existing_appointment = Appointment.objects.filter(
+                            stylist__user=profile.user,
+                            appointment_date=appointment_date,
+                            start_time=start_time
+                        ).exists()
+                        
+                        if not existing_appointment:
+                            # 対応するStylistモデルを取得または作成
+                            stylist, created = Stylist.objects.get_or_create(
+                                user=profile.user,
+                                defaults={
+                                    'bio': profile.bio,
+                                    'experience_years': profile.experience_years,
+                                    'is_available': True
+                                }
+                            )
+                            assigned_stylist = stylist
+                            break
+                
+                if assigned_stylist:
+                    serializer.validated_data['stylist'] = assigned_stylist
+                else:
+                    return Response({
+                        'error': '指定時間に利用可能なスタイリストがいません。',
+                        'available_times': []  # TODO: 利用可能な時間を提案
+                    }, status=status.HTTP_400_BAD_REQUEST)
         
         # ゲスト予約の場合、一時的なユーザーを作成または取得
         customer = request.user
@@ -471,6 +517,106 @@ def manual_appointment_detail(request, appointment_id):
     if request.method == 'GET':
         serializer = ManualAppointmentSerializer(appointment)
         return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = ManualAppointmentSerializer(appointment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        appointment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticatedOrGuestWithReferral])
+def create_walk_in_appointment(request):
+    """指名なし予約専用エンドポイント（自動スタイリスト割り当て）"""
+    data = request.data.copy()
+    data['auto_assign'] = True  # 自動割り当てを強制
+    
+    # stylistが指定されている場合は削除（自動割り当てのため）
+    if 'stylist' in data:
+        del data['stylist']
+    
+    # 一般的な予約作成関数を使用
+    request.data = data
+    return create_appointment(request)
+
+
+@api_view(['GET'])
+@permission_classes([])
+def get_available_walk_in_times(request):
+    """指名なし予約用の利用可能時間取得"""
+    from accounts.models import StylistProfile
+    
+    date_str = request.GET.get('date')
+    service_id = request.GET.get('service_id')
+    
+    if not date_str or not service_id:
+        return Response(
+            {'error': '日付とサービスIDが必要です'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        appointment_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        service = Service.objects.get(id=service_id)
+    except (ValueError, Service.DoesNotExist):
+        return Response(
+            {'error': '無効な日付またはサービスIDです'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # 利用可能なスタイリストを取得
+    available_profiles = StylistProfile.objects.filter(
+        is_active=True,
+        accepts_walk_ins=True
+    )
+    
+    available_times = []
+    time_slots = []
+    
+    # 9:00から18:00までの30分刻みのタイムスロットを生成
+    current_time = time(9, 0)
+    end_time = time(18, 0)
+    
+    while current_time < end_time:
+        time_slots.append(current_time)
+        current_time = (datetime.combine(appointment_date, current_time) + timedelta(minutes=30)).time()
+    
+    for time_slot in time_slots:
+        appointment_datetime = datetime.combine(appointment_date, time_slot)
+        
+        # 利用可能なスタイリストがいるかチェック
+        has_available_stylist = False
+        for profile in available_profiles:
+            if profile.is_available_at(appointment_datetime):
+                # 既存の予約をチェック
+                existing_appointment = Appointment.objects.filter(
+                    stylist__user=profile.user,
+                    appointment_date=appointment_date,
+                    start_time=time_slot
+                ).exists()
+                
+                if not existing_appointment:
+                    has_available_stylist = True
+                    break
+        
+        if has_available_stylist:
+            available_times.append({
+                'time': time_slot.strftime('%H:%M'),
+                'display': time_slot.strftime('%H:%M'),
+                'available': True
+            })
+    
+    return Response({
+        'date': date_str,
+        'service': ServiceSerializer(service).data,
+        'available_times': available_times
+    })
     
     elif request.method == 'PUT':
         serializer = ManualAppointmentCreateSerializer(appointment, data=request.data, partial=True)

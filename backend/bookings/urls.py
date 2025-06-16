@@ -16,4 +16,8 @@ urlpatterns = [
     # 手動予約管理
     path('manual-appointments/', views.manual_appointments, name='manual_appointments'),
     path('manual-appointments/<int:appointment_id>/', views.manual_appointment_detail, name='manual_appointment_detail'),
+    
+    # 指名なし予約（自動割り当て）
+    path('walk-in/appointment/', views.create_walk_in_appointment, name='create_walk_in_appointment'),
+    path('walk-in/available-times/', views.get_available_walk_in_times, name='get_available_walk_in_times'),
 ]
