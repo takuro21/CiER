@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Service, Stylist, Appointment, StylistService
+from .models import Service, Stylist, Appointment, StylistService, StylistBookingLink, ManualAppointment
 from accounts.serializers import UserSerializer
 
 
@@ -74,3 +74,64 @@ class AppointmentSerializer(serializers.ModelSerializer):
             'status', 'requires_payment', 'total_amount', 'notes',
             'created_at', 'updated_at'
         ]
+
+
+class StylistBookingLinkSerializer(serializers.ModelSerializer):
+    """スタイリストブッキングリンクのシリアライザー"""
+    stylist_name = serializers.CharField(source='stylist.user.get_full_name', read_only=True)
+    
+    class Meta:
+        model = StylistBookingLink
+        fields = [
+            'id', 'unique_code', 'booking_url', 'is_active', 
+            'max_advance_days', 'allow_guest_booking', 'stylist_name',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['unique_code', 'booking_url']
+
+
+class ManualAppointmentSerializer(serializers.ModelSerializer):
+    """手動予約のシリアライザー"""
+    service_name = serializers.CharField(source='service.name', read_only=True)
+    stylist_name = serializers.CharField(source='stylist.user.get_full_name', read_only=True)
+    created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
+    
+    class Meta:
+        model = ManualAppointment
+        fields = [
+            'id', 'service', 'service_name', 'stylist_name', 'customer_name',
+            'customer_phone', 'customer_email', 'appointment_date', 
+            'duration_minutes', 'notes', 'is_confirmed', 'created_by_name',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_by_name']
+
+
+class ManualAppointmentCreateSerializer(serializers.ModelSerializer):
+    """手動予約作成用のシリアライザー"""
+    end_time = serializers.DateTimeField(write_only=True, required=False)
+    
+    class Meta:
+        model = ManualAppointment
+        fields = [
+            'service', 'customer_name', 'customer_phone', 'customer_email',
+            'appointment_date', 'end_time', 'duration_minutes', 'notes', 'is_confirmed'
+        ]
+    
+    def validate(self, data):
+        # 終了時間が指定されている場合、duration_minutesを計算
+        if data.get('end_time') and data.get('appointment_date'):
+            start_time = data['appointment_date']
+            end_time = data['end_time']
+            
+            if end_time <= start_time:
+                raise serializers.ValidationError("終了時間は開始時間より後に設定してください。")
+            
+            duration = (end_time - start_time).total_seconds() / 60
+            data['duration_minutes'] = int(duration)
+        
+        # duration_minutesが設定されていない場合はエラー
+        if not data.get('duration_minutes'):
+            raise serializers.ValidationError("所要時間または終了時間を指定してください。")
+        
+        return data

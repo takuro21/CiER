@@ -6,12 +6,15 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta, time
 from django.utils import timezone
-from .models import Service, Stylist, Appointment
+from .models import Service, Stylist, Appointment, StylistService, StylistBookingLink, ManualAppointment
 from .serializers import (
     ServiceSerializer,
     StylistSerializer,
     AppointmentCreateSerializer,
-    AppointmentSerializer
+    AppointmentSerializer,
+    StylistBookingLinkSerializer,
+    ManualAppointmentSerializer,
+    ManualAppointmentCreateSerializer
 )
 from .permissions import IsAuthenticatedOrGuestWithReferral
 from referrals.models import ReferralLink, Referral
@@ -323,3 +326,191 @@ def get_available_time_slots(request):
         'service_duration': service_duration,
         'service_name': service.name
     })
+
+
+# ブッキングリンク管理のビュー
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def manage_booking_link(request):
+    """スタイリストのブッキングリンク管理"""
+    try:
+        stylist = request.user.stylist_profile
+    except:
+        return Response(
+            {'error': 'スタイリストプロフィールが見つかりません'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    if request.method == 'GET':
+        try:
+            booking_link = stylist.booking_link
+            serializer = StylistBookingLinkSerializer(booking_link)
+            return Response(serializer.data)
+        except StylistBookingLink.DoesNotExist:
+            return Response({'message': 'ブッキングリンクが作成されていません'})
+    
+    elif request.method == 'POST':
+        # ブッキングリンクを作成または更新
+        booking_link, created = StylistBookingLink.objects.get_or_create(
+            stylist=stylist,
+            defaults={
+                'max_advance_days': request.data.get('max_advance_days', 30),
+                'allow_guest_booking': request.data.get('allow_guest_booking', True)
+            }
+        )
+        
+        if not created:
+            # 既存のリンクを更新
+            booking_link.max_advance_days = request.data.get('max_advance_days', booking_link.max_advance_days)
+            booking_link.allow_guest_booking = request.data.get('allow_guest_booking', booking_link.allow_guest_booking)
+            booking_link.is_active = request.data.get('is_active', booking_link.is_active)
+            booking_link.save()
+        
+        serializer = StylistBookingLinkSerializer(booking_link)
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_stylist_by_booking_code(request, booking_code):
+    """ブッキングコードからスタイリスト情報を取得"""
+    try:
+        booking_link = StylistBookingLink.objects.get(
+            unique_code=booking_code,
+            is_active=True
+        )
+        serializer = StylistSerializer(booking_link.stylist)
+        return Response({
+            'stylist': serializer.data,
+            'booking_settings': {
+                'max_advance_days': booking_link.max_advance_days,
+                'allow_guest_booking': booking_link.allow_guest_booking
+            }
+        })
+    except StylistBookingLink.DoesNotExist:
+        return Response(
+            {'error': '無効なブッキングコードです'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+# 手動予約管理のビュー
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def manual_appointments(request):
+    """手動予約の一覧取得・作成"""
+    try:
+        stylist = request.user.stylist_profile
+    except:
+        return Response(
+            {'error': 'スタイリストプロフィールが見つかりません'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    if request.method == 'GET':
+        # 手動予約の一覧を取得
+        appointments = ManualAppointment.objects.filter(stylist=stylist)
+        
+        # 日付でフィルタリング
+        date_from = request.query_params.get('date_from')
+        date_to = request.query_params.get('date_to')
+        
+        if date_from:
+            appointments = appointments.filter(appointment_date__date__gte=date_from)
+        if date_to:
+            appointments = appointments.filter(appointment_date__date__lte=date_to)
+        
+        serializer = ManualAppointmentSerializer(appointments, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        # 手動予約を作成
+        serializer = ManualAppointmentCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            manual_appointment = serializer.save(
+                stylist=stylist,
+                created_by=request.user
+            )
+            
+            # 通知を作成
+            from notifications.views import create_notification
+            create_notification(
+                user=request.user,
+                notification_type='appointment',
+                title='手動予約を作成しました',
+                message=f'{manual_appointment.customer_name}様の予約を作成しました（{manual_appointment.appointment_date.strftime("%Y年%m月%d日 %H:%M")}）',
+                data={
+                    'appointment_id': manual_appointment.id,
+                    'customer_name': manual_appointment.customer_name,
+                    'service_name': manual_appointment.service.name,
+                    'appointment_time': manual_appointment.appointment_date.strftime("%H:%M")
+                }
+            )
+            
+            return_serializer = ManualAppointmentSerializer(manual_appointment)
+            return Response(return_serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def manual_appointment_detail(request, appointment_id):
+    """手動予約の詳細取得・更新・削除"""
+    try:
+        stylist = request.user.stylist_profile
+        appointment = ManualAppointment.objects.get(
+            id=appointment_id,
+            stylist=stylist
+        )
+    except ManualAppointment.DoesNotExist:
+        return Response(
+            {'error': '予約が見つかりません'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    if request.method == 'GET':
+        serializer = ManualAppointmentSerializer(appointment)
+        return Response(serializer.data)
+    
+    elif request.method == 'PUT':
+        serializer = ManualAppointmentCreateSerializer(appointment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            
+            # 通知を作成
+            from notifications.views import create_notification
+            create_notification(
+                user=request.user,
+                notification_type='appointment',
+                title='手動予約を更新しました',
+                message=f'{appointment.customer_name}様の予約を更新しました',
+                data={
+                    'appointment_id': appointment.id,
+                    'customer_name': appointment.customer_name,
+                    'service_name': appointment.service.name,
+                    'appointment_time': appointment.appointment_date.strftime("%H:%M")
+                }
+            )
+            
+            return_serializer = ManualAppointmentSerializer(appointment)
+            return Response(return_serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        customer_name = appointment.customer_name
+        appointment.delete()
+        
+        # 通知を作成
+        from notifications.views import create_notification
+        create_notification(
+            user=request.user,
+            notification_type='cancellation',
+            title='手動予約をキャンセルしました',
+            message=f'{customer_name}様の予約をキャンセルしました',
+            data={
+                'customer_name': customer_name
+            }
+        )
+        
+        return Response({'message': '予約を削除しました'})

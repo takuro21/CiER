@@ -149,3 +149,105 @@ class Appointment(models.Model):
     
     def __str__(self):
         return f"{self.customer.username} - {self.service.name} ({self.appointment_date})"
+
+
+class StylistBookingLink(models.Model):
+    """スタイリスト専用ブッキングリンク"""
+    stylist = models.OneToOneField(
+        Stylist,
+        on_delete=models.CASCADE,
+        related_name='booking_link'
+    )
+    unique_code = models.CharField(
+        max_length=32,
+        unique=True,
+        verbose_name='ユニークコード'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='有効'
+    )
+    booking_url = models.URLField(
+        blank=True,
+        verbose_name='ブッキングURL'
+    )
+    max_advance_days = models.PositiveIntegerField(
+        default=30,
+        verbose_name='最大事前予約日数'
+    )
+    allow_guest_booking = models.BooleanField(
+        default=True,
+        verbose_name='ゲスト予約を許可'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'スタイリストブッキングリンク'
+        verbose_name_plural = 'スタイリストブッキングリンク'
+    
+    def __str__(self):
+        return f"{self.stylist.user.username}のブッキングリンク"
+    
+    def save(self, *args, **kwargs):
+        if not self.unique_code:
+            import secrets
+            self.unique_code = secrets.token_urlsafe(16)
+        
+        if not self.booking_url:
+            from django.conf import settings
+            base_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
+            self.booking_url = f"{base_url}/book/{self.unique_code}"
+        
+        super().save(*args, **kwargs)
+
+
+class ManualAppointment(models.Model):
+    """手動作成予約（スタイリストが直接作成）"""
+    stylist = models.ForeignKey(
+        Stylist,
+        on_delete=models.CASCADE,
+        related_name='manual_appointments'
+    )
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.CASCADE
+    )
+    customer_name = models.CharField(
+        max_length=100,
+        verbose_name='顧客名'
+    )
+    customer_phone = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name='顧客電話番号'
+    )
+    customer_email = models.EmailField(
+        blank=True,
+        verbose_name='顧客メールアドレス'
+    )
+    appointment_date = models.DateTimeField(verbose_name='予約日時')
+    duration_minutes = models.PositiveIntegerField(verbose_name='所要時間（分）')
+    notes = models.TextField(
+        blank=True,
+        verbose_name='備考'
+    )
+    is_confirmed = models.BooleanField(
+        default=True,
+        verbose_name='確定済み'
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='created_manual_appointments'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-appointment_date']
+        verbose_name = '手動予約'
+        verbose_name_plural = '手動予約'
+    
+    def __str__(self):
+        return f"{self.customer_name} - {self.service.name} ({self.appointment_date})"
