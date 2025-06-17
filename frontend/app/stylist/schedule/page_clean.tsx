@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Layout from '../../../components/StylistLayout';
 import { 
-  Clock, Plus, ChevronLeft, ChevronRight, 
-  Users, X, QrCode, Download, Settings, Copy,
-  Star, CheckCircle
+  Calendar, Clock, Plus, Edit, Trash2, Share2, ChevronLeft, ChevronRight, 
+  Users, Eye, X, QrCode, Save, Download, Settings, Camera, Copy, ArrowLeft,
+  Filter, Search, Star, Zap, CheckCircle, AlertCircle, Coffee, Moon, Sun
 } from 'lucide-react';
+import Link from 'next/link';
+import { Appointment } from '../../../lib/types';
 
 // Enhanced interfaces for next-level scheduling system
 interface AppointmentBlock {
@@ -73,10 +75,14 @@ export default function StylistSchedulePage() {
   const [mounted, setMounted] = useState(false);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [schedule, setSchedule] = useState<ScheduleDay[]>([]);
+  const [showAddSlotModal, setShowAddSlotModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [viewMode, setViewMode] = useState<'both' | 'available' | 'booked' | 'analytics'>('both');
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
 
   // Enhanced state management
-  const [scheduleMetrics] = useState<ScheduleMetrics>({
+  const [scheduleMetrics, setScheduleMetrics] = useState<ScheduleMetrics>({
     weeklyRevenue: 0,
     weeklyBookings: 0,
     averageUtilization: 0,
@@ -86,6 +92,7 @@ export default function StylistSchedulePage() {
   });
 
   // Advanced UI state
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showAppointmentDetailModal, setShowAppointmentDetailModal] = useState(false);
   const [selectedAppointmentBlock, setSelectedAppointmentBlock] = useState<AppointmentBlock | null>(null);
@@ -108,6 +115,8 @@ export default function StylistSchedulePage() {
     duration: 60,
     price: 0
   });
+
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState<{ date: string; startTime: string; endTime: string } | null>(null);
 
   // Time constants for perfect grid alignment
   const SLOT_HEIGHT = 72;
@@ -136,7 +145,7 @@ export default function StylistSchedulePage() {
     sunday: '日曜日'
   };
 
-  const dayShortNames = useMemo(() => ['日', '月', '火', '水', '木', '金', '土'], []);
+  const dayShortNames = ['日', '月', '火', '水', '木', '金', '土'];
 
   // Perfect time grid generation system
   const generatePerfectTimeGrid = useCallback(() => {
@@ -284,8 +293,16 @@ export default function StylistSchedulePage() {
   };
 
   const handleTimeSlotClick = (slot: EnhancedTimeSlot, date: string, startTime: string) => {
-    // 手動予約モーダルを開く機能（将来実装）
-    console.log('Time slot clicked:', { slot, date, startTime });
+    setSelectedTimeSlot({
+      date: date,
+      startTime: startTime,
+      endTime: slot.end_time
+    });
+    setManualBookingData({
+      ...manualBookingData,
+      date: date,
+      startTime: startTime
+    });
     setShowManualBookingModal(true);
   };
 
@@ -458,7 +475,7 @@ export default function StylistSchedulePage() {
               {/* ヘッダー */}
               <div className="grid grid-cols-8 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
                 <div className="p-4 text-white font-semibold">時間</div>
-                {schedule.map((day) => (
+                {schedule.map((day, index) => (
                   <div key={day.date} className="p-4 text-white font-semibold text-center">
                     <div className="text-lg">{day.dayOfWeek}</div>
                     <div className="text-sm opacity-80">
@@ -470,7 +487,7 @@ export default function StylistSchedulePage() {
 
               {/* タイムグリッド */}
               <div className="relative">
-                {timeGrid.map((timePoint) => (
+                {timeGrid.map((timePoint, timeIndex) => (
                   <div 
                     key={timePoint.time} 
                     className="grid grid-cols-8 border-b border-gray-100"
@@ -486,7 +503,7 @@ export default function StylistSchedulePage() {
                     </div>
                     
                     {/* スケジュール列 */}
-                    {schedule.map((day) => {
+                    {schedule.map((day, dayIndex) => {
                       const slot = day.slots.find(s => s.start_time === timePoint.time);
                       
                       return (
@@ -568,7 +585,6 @@ export default function StylistSchedulePage() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-6">予約用QRコード</h3>
                 {qrCodeUrl && (
                   <div className="mb-6">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={qrCodeUrl} alt="QR Code" className="w-48 h-48 mx-auto border-2 border-gray-200 rounded-xl" />
                   </div>
                 )}
