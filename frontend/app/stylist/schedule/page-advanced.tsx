@@ -243,7 +243,7 @@ export default function StylistSchedulePage() {
       weekDays.push({
         date: date.toISOString().split('T')[0],
         dayOfWeek: dayShortNames[date.getDay()],
-        slots: generateDaySlots(date.toISOString().split('T')[0], date.getDay())
+        slots: generateDaySlots(date.toISOString().split('T')[0], date.getDay()) as TimeSlot[]
       });
     }
     
@@ -550,8 +550,10 @@ export default function StylistSchedulePage() {
                               予約済み
                               <br />
                               {slot.service_type}
-                              {slot.price && (
+                              {slot.price ? (
                                 <br />¥{slot.price.toLocaleString()}
+                              ) : (
+                                <br />価格未設定
                               )}
                             </div>
                           )}

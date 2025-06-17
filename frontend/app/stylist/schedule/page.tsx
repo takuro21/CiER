@@ -36,12 +36,21 @@ interface EnhancedTimeSlot {
   duration_minutes: number;
   appointmentBlock?: AppointmentBlock;
   gridPosition?: { row: number; column: number };
+  is_appointment_start?: boolean;
+  is_appointment_continuation?: boolean;
 }
 
 interface ScheduleDay {
   date: string;
   dayOfWeek: string;
   slots: EnhancedTimeSlot[];
+  statistics?: {
+    totalBookings: number;
+    totalRevenue: number;
+    utilization: number;
+    efficiency: number;
+    averageRating: number;
+  };
 }
 
 interface WorkingHours {
@@ -76,7 +85,7 @@ export default function StylistSchedulePage() {
   const [viewMode, setViewMode] = useState<'both' | 'available' | 'booked' | 'analytics'>('both');
 
   // Enhanced state management
-  const [scheduleMetrics] = useState<ScheduleMetrics>({
+  const [scheduleMetrics, setScheduleMetrics] = useState<ScheduleMetrics>({
     weeklyRevenue: 0,
     weeklyBookings: 0,
     averageUtilization: 0,
@@ -182,6 +191,9 @@ export default function StylistSchedulePage() {
     const [workStartHour, workStartMinute] = workingDay.start.split(':').map(Number);
     const [workEndHour, workEndMinute] = workingDay.end.split(':').map(Number);
     
+    // ダミーの予約データ
+    const dummyAppointments: AppointmentBlock[] = generateDummyAppointments(dateStr, dayOfWeek);
+    
     timeGrid.forEach((timePoint, index) => {
       const [hour, minute] = timePoint.time.split(':').map(Number);
       const timeMinutes = hour * 60 + minute;
@@ -198,14 +210,30 @@ export default function StylistSchedulePage() {
         
         const endTimeStr = `${nextHour.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`;
 
+        // 該当時間に予約があるかチェック
+        const appointment = dummyAppointments.find(apt => apt.startTime === timePoint.time);
+        
+        // 該当時間が他の予約の継続中かチェック
+        const isPartOfAppointment = dummyAppointments.some(apt => {
+          const [aptStartHour, aptStartMinute] = apt.startTime.split(':').map(Number);
+          const [aptEndHour, aptEndMinute] = apt.endTime.split(':').map(Number);
+          const aptStartMinutes = aptStartHour * 60 + aptStartMinute;
+          const aptEndMinutes = aptEndHour * 60 + aptEndMinute;
+          
+          return timeMinutes >= aptStartMinutes && timeMinutes < aptEndMinutes;
+        });
+
         slots.push({
           id: `${dateStr}-${timePoint.time}`,
           date: dateStr,
           start_time: timePoint.time,
           end_time: endTimeStr,
-          is_available: true,
+          is_available: !isPartOfAppointment,
           duration_minutes: TIME_PRECISION,
-          gridPosition: { row: index, column: dayOfWeek }
+          gridPosition: { row: index, column: dayOfWeek },
+          appointmentBlock: appointment, // 開始時間のスロットのみに予約情報を設定
+          is_appointment_start: !!appointment,
+          is_appointment_continuation: isPartOfAppointment && !appointment
         });
       }
     });
@@ -213,22 +241,145 @@ export default function StylistSchedulePage() {
     return slots;
   }, [workingHours, timeGrid]);
 
+  // ダミー予約データ生成関数
+  const generateDummyAppointments = useCallback((dateStr: string, dayOfWeek: number): AppointmentBlock[] => {
+    const appointments: AppointmentBlock[] = [];
+    
+    // 曜日ごとの予約パターン
+    const weekdayPatterns = {
+      0: [], // 日曜日（休業）
+      1: [ // 月曜日（比較的空いている）
+        { start: '10:00', duration: 90, customer: '田中 美咲', service: 'カット+カラー', price: 8000 },
+        { start: '13:30', duration: 30, customer: '佐藤 花音', service: 'シャンプー', price: 1500 },
+        { start: '14:30', duration: 60, customer: '山田 麗華', service: 'カット', price: 4000 },
+        { start: '16:30', duration: 180, customer: '森 美紀', service: 'カット+カラー+パーマ', price: 18000 }
+      ],
+      2: [ // 火曜日（普通）
+        { start: '09:00', duration: 30, customer: '鈴木 愛美', service: 'ブロー', price: 2000 },
+        { start: '10:00', duration: 60, customer: '高橋 優香', service: 'カット', price: 4000 },
+        { start: '11:30', duration: 90, customer: '伊藤 美穂', service: 'カット+カラー', price: 8000 },
+        { start: '14:00', duration: 150, customer: '渡辺 彩乃', service: 'カット+パーマ+トリートメント', price: 15000 }
+      ],
+      3: [ // 水曜日（忙しい）
+        { start: '09:00', duration: 60, customer: '中村 さくら', service: 'カット', price: 4000 },
+        { start: '10:30', duration: 90, customer: '小林 美奈', service: 'カット+カラー', price: 8000 },
+        { start: '12:30', duration: 60, customer: '加藤 理恵', service: 'カット', price: 4000 },
+        { start: '14:00', duration: 120, customer: '吉田 夏美', service: 'カット+パーマ', price: 12000 },
+        { start: '16:30', duration: 60, customer: '斎藤 由紀', service: 'トリートメント', price: 3000 }
+      ],
+      4: [ // 木曜日（普通）
+        { start: '10:00', duration: 90, customer: '松本 真由美', service: 'カット+カラー', price: 8000 },
+        { start: '13:00', duration: 60, customer: '井上 恵子', service: 'カット', price: 4000 },
+        { start: '15:00', duration: 90, customer: '木村 亜希子', service: 'カット+カラー', price: 8000 }
+      ],
+      5: [ // 金曜日（非常に忙しい）
+        { start: '09:00', duration: 60, customer: '林 美智子', service: 'カット', price: 4000 },
+        { start: '10:30', duration: 120, customer: '清水 雅美', service: 'カット+パーマ', price: 12000 },
+        { start: '13:00', duration: 90, customer: '山口 和美', service: 'カット+カラー', price: 8000 },
+        { start: '15:00', duration: 60, customer: '森田 裕子', service: 'トリートメント', price: 3000 },
+        { start: '16:30', duration: 90, customer: '池田 香織', service: 'カット+カラー', price: 8000 }
+      ],
+      6: [ // 土曜日（最も忙しい）
+        { start: '09:00', duration: 90, customer: '橋本 美樹', service: 'カット+カラー', price: 8000 },
+        { start: '11:00', duration: 60, customer: '石川 明美', service: 'カット', price: 4000 },
+        { start: '12:30', duration: 120, customer: '中島 綾子', service: 'カット+パーマ', price: 12000 },
+        { start: '15:00', duration: 60, customer: '藤田 直美', service: 'カット', price: 4000 },
+        { start: '16:30', duration: 60, customer: '宮崎 智恵', service: 'トリートメント', price: 3000 }
+      ]
+    };
+
+    const dayAppointments = weekdayPatterns[dayOfWeek as keyof typeof weekdayPatterns] || [];
+    
+    dayAppointments.forEach((apt, index) => {
+      const startTime = apt.start;
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+      const endMinutes = startMinute + apt.duration;
+      const endHour = startHour + Math.floor(endMinutes / 60);
+      const endMinute = endMinutes % 60;
+      const endTime = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`;
+      
+      // ランダムな予約状態
+      const statuses: ('confirmed' | 'pending')[] = ['confirmed', 'confirmed', 'confirmed', 'pending'];
+      const priorities: ('normal' | 'high')[] = ['normal', 'normal', 'high'];
+      
+      appointments.push({
+        id: `${dateStr}-${index}`,
+        customerName: apt.customer,
+        service: apt.service,
+        startTime: startTime,
+        endTime: endTime,
+        duration: apt.duration,
+        price: apt.price,
+        phone: `090-${Math.floor(Math.random() * 9000) + 1000}-${Math.floor(Math.random() * 9000) + 1000}`,
+        email: `${apt.customer.replace(/\s+/g, '').toLowerCase()}@example.com`,
+        notes: index % 3 === 0 ? '初回のお客様' : index % 5 === 0 ? 'アレルギーあり（要注意）' : '',
+        status: statuses[index % statuses.length],
+        priority: priorities[index % priorities.length]
+      });
+    });
+
+    return appointments;
+  }, []);
+
   const generateWeeklySchedule = useCallback(() => {
     const days: ScheduleDay[] = [];
     const startOfWeek = new Date(currentWeek);
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+
+    let totalRevenue = 0;
+    let totalBookings = 0;
+    let totalWorkingSlots = 0;
+    let totalBookedSlots = 0;
 
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
       date.setDate(date.getDate() + i);
       const dateStr = date.toISOString().split('T')[0];
       
+      const daySlots = generateEnhancedDaySlots(dateStr, i);
+      
+      // 日別統計を計算
+      const dayBookings = daySlots.filter(slot => slot.appointmentBlock);
+      const dayRevenue = dayBookings.reduce((sum, slot) => sum + (slot.appointmentBlock?.price || 0), 0);
+      
+      totalRevenue += dayRevenue;
+      totalBookings += dayBookings.length;
+      totalWorkingSlots += daySlots.length;
+      totalBookedSlots += dayBookings.length;
+      
       days.push({
         date: dateStr,
         dayOfWeek: dayShortNames[i],
-        slots: generateEnhancedDaySlots(dateStr, i)
+        slots: daySlots,
+        statistics: {
+          totalBookings: dayBookings.length,
+          totalRevenue: dayRevenue,
+          utilization: daySlots.length > 0 ? (dayBookings.length / daySlots.length) * 100 : 0,
+          efficiency: 92 + Math.random() * 8, // 92-100%のランダム効率
+          averageRating: 4.5 + Math.random() * 0.5 // 4.5-5.0の評価
+        }
       });
     }
+    
+    // 週間メトリクスを更新
+    const weeklyUtilization = totalWorkingSlots > 0 ? (totalBookedSlots / totalWorkingSlots) * 100 : 0;
+    
+    setScheduleMetrics({
+      weeklyRevenue: totalRevenue,
+      weeklyBookings: totalBookings,
+      averageUtilization: Math.round(weeklyUtilization),
+      peakHours: ['14:00-16:00', '10:00-12:00'], // ピーク時間帯
+      suggestions: [
+        totalBookings < 20 ? '📈 平日午後の予約枠を増やすことで売上向上が期待できます' : '✨ 予約状況は良好です！',
+        weeklyUtilization < 70 ? '⏰ 営業時間の最適化をお勧めします' : '🎯 効率的な時間管理ができています',
+        '💡 QRコード予約でオンライン集客を強化しましょう'
+      ],
+      trends: {
+        revenue: [totalRevenue * 0.8, totalRevenue * 0.9, totalRevenue], // 3週間のトレンド
+        bookings: [totalBookings - 3, totalBookings - 1, totalBookings],
+        utilization: [weeklyUtilization - 10, weeklyUtilization - 5, weeklyUtilization]
+      }
+    });
     
     setSchedule(days);
   }, [currentWeek, generateEnhancedDaySlots, dayShortNames]);
@@ -496,20 +647,39 @@ export default function StylistSchedulePage() {
                           onClick={() => {
                             if (slot?.is_available) {
                               handleTimeSlotClick(slot, day.date, timePoint.time);
+                            } else if (slot?.is_appointment_continuation) {
+                              // 継続中のスロットがクリックされた場合、その予約の開始スロットを見つけて詳細を表示
+                              const appointmentSlot = day.slots.find(s => 
+                                s.is_appointment_start && 
+                                s.appointmentBlock &&
+                                timePoint.time >= s.appointmentBlock.startTime &&
+                                timePoint.time < s.appointmentBlock.endTime
+                              );
+                              if (appointmentSlot?.appointmentBlock) {
+                                setSelectedAppointmentBlock(appointmentSlot.appointmentBlock);
+                                setShowAppointmentDetailModal(true);
+                              }
                             }
                           }}
                         >
-                          {slot?.appointmentBlock ? (
-                            /* 予約ブロック */
+                          {/* 予約の開始スロットのみ予約ブロックを表示 */}
+                          {slot?.is_appointment_start && slot.appointmentBlock ? (
+                            /* 予約ブロック - 開始スロットのみ */
                             <div 
                               className={`absolute inset-1 rounded-lg p-3 shadow-md cursor-pointer transition-all duration-300 ${
                                 hoveredAppointmentId === slot.appointmentBlock.id
                                   ? 'transform scale-105 shadow-xl z-10'
                                   : ''
-                              } bg-gradient-to-br from-emerald-400 to-emerald-500 text-white`}
+                              } bg-gradient-to-br from-emerald-400 to-emerald-500 text-white overflow-hidden`}
+                              style={{
+                                height: `${(slot.appointmentBlock.duration / TIME_PRECISION) * SLOT_HEIGHT - 8}px`,
+                                zIndex: 5,
+                                minHeight: '60px'
+                              }}
                               onMouseEnter={() => setHoveredAppointmentId(slot.appointmentBlock!.id)}
                               onMouseLeave={() => setHoveredAppointmentId(null)}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setSelectedAppointmentBlock(slot.appointmentBlock!);
                                 setShowAppointmentDetailModal(true);
                               }}
@@ -520,9 +690,21 @@ export default function StylistSchedulePage() {
                               <div className="text-xs opacity-90 truncate">
                                 {slot.appointmentBlock.service}
                               </div>
-                              <div className="text-xs opacity-80">
-                                ¥{slot.appointmentBlock.price.toLocaleString()}
+                              <div className="text-xs opacity-80 font-medium">
+                                {slot.appointmentBlock.startTime} - {slot.appointmentBlock.endTime}
                               </div>
+                              <div className="text-xs opacity-80">
+                                ¥{slot.appointmentBlock.price.toLocaleString()} ({slot.appointmentBlock.duration}分)
+                              </div>
+                            </div>
+                          ) : slot?.is_appointment_continuation ? (
+                            /* 予約継続中のスロット - グレーアウト表示 */
+                            <div 
+                              className="h-full bg-emerald-100/80 border-l-4 border-emerald-400 relative cursor-pointer hover:bg-emerald-200/80 transition-colors"
+                              title="予約継続中 - クリックで詳細表示"
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-transparent opacity-60"></div>
+                              <div className="absolute top-2 left-2 w-2 h-2 bg-emerald-400 rounded-full opacity-70"></div>
                             </div>
                           ) : slot?.is_available ? (
                             /* 空き枠 */
