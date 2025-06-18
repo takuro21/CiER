@@ -673,7 +673,7 @@ export default function StylistSchedulePage() {
                               } bg-gradient-to-br from-emerald-400 to-emerald-500 text-white overflow-hidden`}
                               style={{
                                 height: `${(slot.appointmentBlock.duration / TIME_PRECISION) * SLOT_HEIGHT - 8}px`,
-                                zIndex: 5,
+                                zIndex: 10,
                                 minHeight: '60px'
                               }}
                               onMouseEnter={() => setHoveredAppointmentId(slot.appointmentBlock!.id)}
@@ -700,7 +700,7 @@ export default function StylistSchedulePage() {
                           ) : slot?.is_appointment_continuation ? (
                             /* 予約継続中のスロット - グレーアウト表示 */
                             <div 
-                              className="h-full bg-emerald-100/80 border-l-4 border-emerald-400 relative cursor-pointer hover:bg-emerald-200/80 transition-colors"
+                              className="h-full bg-emerald-100/80 relative cursor-pointer hover:bg-emerald-200/80 transition-colors"
                               title="予約継続中 - クリックで詳細表示"
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-transparent opacity-60"></div>
@@ -725,7 +725,7 @@ export default function StylistSchedulePage() {
           )}
 
           {/* フローティングアクションボタン */}
-          <div className="fixed bottom-6 right-6 flex flex-col gap-3">
+          <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-40">
             <button
               onClick={generateQRCode}
               className="w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center"
