@@ -47,15 +47,9 @@ export default function StylistHeader() {
       show: true
     },
     {
-      href: '/stylist/appointments',
-      icon: CalendarIcon,
-      label: '予約管理',
-      show: true
-    },
-    {
       href: '/stylist/schedule',
-      icon: ClockIcon,
-      label: 'スケジュール',
+      icon: CalendarIcon,
+      label: '予約・スケジュール',
       show: true
     },
     {
