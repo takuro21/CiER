@@ -35,16 +35,21 @@ export default function LoginPage() {
       console.log('📝 Login Form: Username:', username);
       console.log('📝 Login Form: Password length:', password.length);
       
-      await login(username, password);
+      const result = await login(username, password);
       
-      console.log('✅ Login Form: Login successful, redirecting...');
-      
-      // リファラルコードがある場合は予約ページにリダイレクト
-      const referralCode = mounted ? searchParams.get('ref') : null;
-      if (referralCode) {
-        router.push(`/book?ref=${referralCode}`);
+      if (result.success) {
+        console.log('✅ Login Form: Login successful, redirecting...');
+        
+        // リファラルコードがある場合は予約ページにリダイレクト
+        const referralCode = mounted ? searchParams.get('ref') : null;
+        if (referralCode) {
+          router.push(`/book?ref=${referralCode}`);
+        } else {
+          router.push('/');
+        }
       } else {
-        router.push('/');
+        console.log('❌ Login Form: Login failed:', result.error);
+        setError(result.error || 'ログインに失敗しました');
       }
     } catch (error: any) {
       console.group('🚨 Login Form: Error occurred');
